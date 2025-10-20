@@ -5,23 +5,19 @@ import java.util.jar.*;
 
 public class PackageAnalyzer {
 
-    public void analyzePackage(Path jarPath) throws IOException {
+    public Map<String, String> analyzePackage(Path jarPath) throws IOException {
+        Map<String, String> manifestData = new LinkedHashMap<>();
+
         try (JarFile jarFile = new JarFile(jarPath.toFile())) {
-            JarEntry manifestEntry = jarFile.getJarEntry("META-INF/MANIFEST.MF");
-            if (manifestEntry == null) {
-                System.out.println("MANIFEST.MF не найден в архиве.");
-                return;
-            }
-
-            System.out.println("=== Служебная информация из MANIFEST.MF ===");
-
             Manifest manifest = jarFile.getManifest();
             if (manifest == null) {
-                System.out.println("Ошибка: не удалось прочитать MANIFEST.");
-                return;
+                System.out.println("MANIFEST.MF не найден.");
+                return manifestData;
             }
 
             Attributes attrs = manifest.getMainAttributes();
+
+            System.out.println("=== Служебная информация из MANIFEST.MF ===");
 
             int longestKey = attrs.keySet().stream()
                     .map(Object::toString)
@@ -32,10 +28,13 @@ public class PackageAnalyzer {
             for (Map.Entry<Object, Object> entry : attrs.entrySet()) {
                 String key = entry.getKey().toString();
                 String value = entry.getValue().toString();
+                manifestData.put(key, value);
                 System.out.printf("%-" + (longestKey + 2) + "s : %s%n", key, value);
             }
 
-            System.out.println("\n=== Всего атрибутов: " + attrs.size() + " ===");
+            System.out.println("=== Всего атрибутов: " + attrs.size() + " ===");
         }
+
+        return manifestData;
     }
 }

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.*;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,7 +17,11 @@ public class Main {
             Path jarPath = downloader.downloadPackage(groupId, artifactId, version);
 
             PackageAnalyzer analyzer = new PackageAnalyzer();
-            analyzer.analyzePackage(jarPath);
+            Map<String, String> manifestData = analyzer.analyzePackage(jarPath);
+
+            GraphBuilder graphBuilder = new GraphBuilder();
+            String outputName = artifactId + "-" + version;
+            graphBuilder.buildGraph(manifestData, outputName);
 
         } catch (Exception e) {
             e.printStackTrace();
